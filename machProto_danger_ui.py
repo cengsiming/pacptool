@@ -44,4 +44,4 @@ class MachProto_danger_ui:
         self.window.mainloop()
 
 if __name__ == '__main__':
-    aa=MachProto_ui()
+    ...

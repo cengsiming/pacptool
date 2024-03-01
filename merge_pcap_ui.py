@@ -1,7 +1,6 @@
 import time
 from tkinter.filedialog import askopenfilenames
 import ttkbootstrap as ttk
-from compare_pcap import start_run,wirte_result2
 from threading import Thread
 from scapy.all import wrpcap,rdpcap
 
@@ -25,6 +24,7 @@ class Merge_ui:
 
     def start_merge(self,file_list):
         li = []
+        self.l4.insert('end', '正在处理..' + '\n')
         for i in file_list:
             a = rdpcap(i)
             li.extend(a)

@@ -1,4 +1,4 @@
-import time
+import time,re
 
 from changePacket import ChangePacket,ipaddress
 import ttkbootstrap as ttk
@@ -31,25 +31,36 @@ class ChangePacetUI:
         self.dstip = ttk.StringVar()
         self.srcport = ttk.StringVar()
         self.dstport = ttk.StringVar()
+        self.srcmac = ttk.StringVar()
+        self.dstmac = ttk.StringVar()
         self.srcip.set("1")
         self.dstip.set("1")
         self.srcport.set("1")
         self.dstport.set("1")
+        self.srcmac.set("1")
+        self.dstmac.set("1")
         self.variable_content = [
             [self.srcip, "源IP"],
             [self.dstip, "目的IP"],
             [self.srcport, "源端口"],
-            [self.dstport, "目的端口"]
+            [self.dstport, "目的端口"],
+            [self.srcmac, "源mac"],
+            [self.dstmac, "目的mac"]
         ]
         self.filepath=''
         self.check_srcip2=self.window.register(self.check_srcip)#注册验证函数
         self.check_srcport2=self.window.register(self.check_srcport)
+        self.check_srcmac2=self.window.register(self.check_srcmac)
         self.check_dstip2=self.window.register(self.check_dstip)#注册验证函数
         self.check_dstport2=self.window.register(self.check_dstport)
+        self.check_dstmac2=self.window.register(self.check_dstmac)#注册验证函数
+
         self.srcip_check=True
         self.dstip_check=True
         self.srcport_check=True
         self.dstport_check=True
+        self.srcmac_check=True
+        self.dstmac_check=True
 
     def specify_arg(self):
         if self.random_arg.get()=="0":
@@ -61,6 +72,10 @@ class ChangePacetUI:
             self.l23.pack(side='left')
             self.l34.pack(side='left')
             self.l24.pack(side='left')
+            self.l35.pack(side='left')
+            self.l25.pack(side='left')
+            self.l36.pack(side='left')
+            self.l26.pack(side='left')
             self.l4.delete("0",'end')
             self.l4.insert('0', "1")
             self.change_ensure()
@@ -76,11 +91,15 @@ class ChangePacetUI:
             self.l23.pack_forget()
             self.l34.pack_forget()
             self.l24.pack_forget()
+            self.l35.pack_forget()
+            self.l25.pack_forget()
+            self.l36.pack_forget()
+            self.l26.pack_forget()
             self.change_ensure()
             self.l6.config(text='随机')
 
     def change_ensure(self):
-        if self.srcip_check and self.dstip_check and self.srcport_check and self.dstport_check and self.filepath!='':
+        if self.srcip_check and self.dstip_check and self.srcport_check and self.dstport_check and self.srcmac_check and self.dstmac_check and self.filepath!='':
             self.l2.config(state='')
         else:
             self.l2.config(state='disable')
@@ -144,6 +163,35 @@ class ChangePacetUI:
             self.change_ensure()
             return False
 
+    def check_srcmac(self,x):
+        pattern = r'^([0-9a-fA-F]{2}[:-]){5}([0-9a-fA-F]{2})$'
+        if x=='':
+            self.srcmac_check=True
+            self.change_ensure()
+            return True
+        elif re.match(pattern, x):
+            self.srcmac_check=True
+            self.change_ensure()
+            return True
+        else:
+            self.srcmac_check=False
+            self.change_ensure()
+            return False
+
+    def check_dstmac(self,x):
+        pattern = r'^([0-9a-fA-F]{2}[:-]){5}([0-9a-fA-F]{2})$'
+        if x=='':
+            self.dstmac_check=True
+            self.change_ensure()
+            return True
+        elif re.match(pattern, x):
+            self.dstmac_check=True
+            self.change_ensure()
+            return True
+        else:
+            self.dstmac_check=False
+            self.change_ensure()
+            return False
 
 
     def ensure(self):
@@ -164,12 +212,14 @@ class ChangePacetUI:
             self.l3.insert('end',"dstip:"+self.dstip.get()+'\n')
             self.l3.insert('end',"srcport:"+self.srcport.get()+'\n')
             self.l3.insert('end',"dstport:"+self.dstport.get()+'\n')
+            self.l3.insert('end',"srcmac:"+self.srcmac.get()+'\n')
+            self.l3.insert('end',"dstmac:"+self.dstmac.get()+'\n')
             self.l3.insert('end','修改次数：'+self.l4.get()+'\n')
             self.l3.insert('end',"开始执行"+'\n')
             self.l13.start(200) #间隔默认为200毫秒（5步/秒）
             self.l3.insert('end',"正在执行"+'\n')
             tmp=ChangePacket(count=int(self.l4.get()),revise_mode=self.l6.cget('text'),filepath=self.filepath,srcip_mode=int(self.srcip.get()),dstip_mode=int(self.dstip.get()),
-                             srcport_mode=int(self.srcport.get()),dstport_mode=int(self.dstport.get()),srcip=self.l21.get(),dstip=self.l22.get(),srcport=self.l23.get(),dstport=self.l24.get())
+                             srcport_mode=int(self.srcport.get()),dstport_mode=int(self.dstport.get()),srcmac_mode=int(self.srcmac.get()),dstmac_mode=int(self.dstmac.get()),srcip=self.l21.get(),dstip=self.l22.get(),srcport=self.l23.get(),dstport=self.l24.get(),srcmac=self.l25.get(),dstmac=self.l26.get())
             Thread(target=tmp.run,args=(self.l3,self.l2,self.l5,self.l13)).start()
         except Exception as e:
             self.l3.insert('end',str(e)+'\n')
@@ -206,6 +256,8 @@ class ChangePacetUI:
         self.franme4.pack(pady=5)
         self.franme2 = ttk.Frame(self.window)
         self.franme2.pack(pady=5)
+        self.franme4 = ttk.Frame(self.window)
+        self.franme4.pack(pady=5)
         self.franme3 = ttk.Frame(self.window)
         self.franme3.pack(pady=5)
         self.l5=ttk.Button(self.franme1,text="选择文件",command=self.open_file)
@@ -216,6 +268,9 @@ class ChangePacetUI:
         ttk.Checkbutton(self.franme2, text="目的IP", variable=self.variable_content[1][0]).pack(side=ttk.LEFT, padx=5)
         ttk.Checkbutton(self.franme2, text="源端口", variable=self.variable_content[2][0]).pack(side=ttk.LEFT, padx=5)
         ttk.Checkbutton(self.franme2, text="目的端口", variable=self.variable_content[3][0]).pack(side=ttk.LEFT, padx=5)
+        ttk.Checkbutton(self.franme4, text="源mac", variable=self.variable_content[4][0]).pack(side=ttk.LEFT, padx=5)
+        ttk.Checkbutton(self.franme4, text="目的mac", variable=self.variable_content[5][0]).pack(side=ttk.LEFT, padx=5)
+
 
         self.random_arg=ttk.StringVar()
         self.random_arg.set("1")
@@ -237,23 +292,34 @@ class ChangePacetUI:
 
         self.franme5 = ttk.Frame(self.window)
         self.franme5.pack(pady=5)
-        self.l31=ttk.Label(self.franme5,text='源IP：        ')
+        self.l31=ttk.Label(self.franme5,text='源IP：         ')
         self.l21=ttk.Entry(self.franme5,validate="focus", validatecommand=(self.check_srcip2, '%P'))
 
         self.franme6 = ttk.Frame(self.window)
         self.franme6.pack(pady=5)
-        self.l32=ttk.Label(self.franme6,text='目的IP：    ')
+        self.l32=ttk.Label(self.franme6,text='目的IP：     ')
         self.l22=ttk.Entry(self.franme6,validate="focus", validatecommand=(self.check_dstip2, '%P'))
 
         self.franme7 = ttk.Frame(self.window)
         self.franme7.pack(pady=5)
-        self.l33=ttk.Label(self.franme7,text='源端口：    ')
+        self.l33=ttk.Label(self.franme7,text='源端口：     ')
         self.l23=ttk.Entry(self.franme7,validate="focus", validatecommand=(self.check_srcport2, '%P'))
         #
         self.franme8 = ttk.Frame(self.window)
         self.franme8.pack(pady=5)
-        self.l34=ttk.Label(self.franme8,text='目的端口：')
+        self.l34=ttk.Label(self.franme8,text='目的端口：  ')
         self.l24=ttk.Entry(self.franme8,validate="focus", validatecommand=(self.check_dstport2, '%P'))
+
+        self.franme9 = ttk.Frame(self.window)
+        self.franme9.pack(pady=5)
+        self.l35=ttk.Label(self.franme9,text='源mac：      ')
+        self.l25=ttk.Entry(self.franme9,validate="focus", validatecommand=(self.check_srcmac2, '%P'))
+
+        self.franme10 = ttk.Frame(self.window)
+        self.franme10.pack(pady=5)
+        self.l36=ttk.Label(self.franme10,text='目的mac：    ')
+        self.l26=ttk.Entry(self.franme10,validate="focus", validatecommand=(self.check_dstmac2, '%P'))
+
 
         self.l3=ttk.ScrolledText(self.window,width=40,height=10)
         self.l3.insert('end','1、支持同时修改多条流'+'\n')

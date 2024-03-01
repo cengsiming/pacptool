@@ -307,6 +307,4 @@ class EditPackets:
     def run(self):
         self.window.mainloop()
 if __name__ == '__main__':
-    a = GUI()
-
-    a.root.mainloop()
+    ...

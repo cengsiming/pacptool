@@ -43,18 +43,21 @@ def start_run(file1,file2,l,l5,l6):
     finalresult=''
     l6.config(state='disable')
     s=time.time()
-    l.insert('end', '开始读取pcap文件' + '\n')
+    l.insert('end', '正在读取pcap文件' + '\n')
     # print('开始读取pcap文件')
     result=asyncio.run(asyncio.wait([read_pcap2(file1),
                                 read_pcap2(file2)]))
-    l.insert('end', '用时：'+str(time.time()-s)+"s" + '\n')
+    l.insert('end', '读取用时：'+str(time.time()-s)+"s" + '\n')
     # print('用时：',time.time()-s,"s")
+    s=time.time()
+    l.insert('end', '正在对比pcap文件' + '\n')
     done=result[0]
     result_list=[i.result() for i in done]
     dict_list=[invert_dic(i[0]) for i in result_list]
     file_names_list=[i[1] for i in result_list]
     check_packet(dict_list[0],dict_list[1],file_names_list[0],file_names_list[1],l)
     check_packet(dict_list[1],dict_list[0],file_names_list[1],file_names_list[0],l)
+    l.insert('end', '对比用时：'+str(time.time()-s)+"s" + '\n')
     l5.stop()
     l6.config(state='')
 

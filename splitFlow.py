@@ -1,9 +1,7 @@
 import os
-import random
 import copy
 import time
 from scapy.all import rdpcap, wrpcap
-import ipaddress
 import hashlib
 
 
@@ -22,7 +20,7 @@ class SplitFlow():
                 srcip = i.payload.src
                 dstip = i.payload.dst
             except:
-                self.not_to_modify+=('无法修改,序号：'+str(j + 1)+'\n')
+                self.not_to_modify+=('无法读取IP 序号：'+str(j + 1)+'\n')
                 # print('无法修改,序号：',j + 1)
                 srcip = ""
                 dstip = ""
@@ -30,6 +28,7 @@ class SplitFlow():
                 srcport = str(i.payload.payload.sport)
                 dstport = str(i.payload.payload.dport)
             except:
+                self.not_to_modify+=('无法读取Port 序号：'+str(j + 1)+'\n')
                 srcport = ""
                 dstport = ""
             li = [srcip, dstip, srcport, dstport]
@@ -45,6 +44,7 @@ class SplitFlow():
                 self.dic2[ha.hexdigest()] = str(f'srcip-{srcip}_dstip-{dstip}_srcport-{srcport}_dstport-{dstport}')
 
     def to_split(self,l):
+        l.insert('end', '正在处理..' + '\n')
         new_packets = copy.deepcopy(self.original_packets)
         for j, i in enumerate(new_packets):
             ha = hashlib.md5()

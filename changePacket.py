@@ -7,7 +7,7 @@ import hashlib
 
 
 class ChangePacket():
-    def __init__(self, count, revise_mode,filepath, srcip_mode=True, dstip_mode=True, srcport_mode=True, dstport_mode=True,srcip='',dstip='',srcport='',dstport=''):
+    def __init__(self, count, revise_mode,filepath, srcip_mode=True, dstip_mode=True, srcport_mode=True, dstport_mode=True,srcmac_mode=True,dstmac_mode=True,srcip='',dstip='',srcport='',dstport='',srcmac='',dstmac=''):
         self.count = count
         self.not_to_modify=''
         self.n = random.randint(1, 65535 - count)
@@ -19,16 +19,22 @@ class ChangePacket():
         self.dstip_mode = dstip_mode
         self.srcport_mode = srcport_mode
         self.dstport_mode = dstport_mode
+        self.srcmac_mode = srcmac_mode
+        self.dstmac_mode = dstmac_mode
         if revise_mode=='指定':
             self.srcip=srcip
             self.dstip=dstip
             self.srcport=int(srcport) if srcport!='' else ''
             self.dstport=int(dstport) if dstport!='' else ''
+            self.srcmac=srcmac
+            self.dstmac=dstmac
         else:
             self.srcip=''
             self.dstip=''
             self.srcport=''
             self.dstport=''
+            self.srcmac=''
+            self.dstmac=''
 
 
     def change_ip(self, i, n, srcip_mode, dstip_mode,srcip,dstip):
@@ -89,6 +95,32 @@ class ChangePacket():
             else:
                 i.payload.payload.dport = int(specify_dstport)
 
+    def change_mac(self, i, n, srcmac_mode, dstmac_mode,srcmac,dstmac):
+        if srcmac_mode:
+            if srcmac=='':
+                srcmac = i.src
+                decimal_mac = int(srcmac.replace(":", ""), 16)
+                # 将十进制数字加n
+                decimal_mac += n
+                # 将加1后的十进制数字转换为MAC地址
+                new_mac_address = ':'.join(format(decimal_mac, '012x')[i:i+2] for i in range(0, 12, 2))
+                i.src = new_mac_address
+            else:
+                i.src = srcmac
+        if dstmac_mode:
+            if dstmac=='':
+                dstmac = i.dst
+                decimal_mac = int(dstmac.replace(":", ""), 16)
+                # 将十进制数字加n
+                decimal_mac += n
+
+                # 将加1后的十进制数字转换为MAC地址
+                new_mac_address = ':'.join(format(decimal_mac, '012x')[i:i+2] for i in range(0, 12, 2))
+                i.dst = new_mac_address
+            else:
+                i.dst = dstmac
+
+
     def get_hashdict(self):
         for j, i in enumerate(self.original_packets):
             ha = hashlib.md5()
@@ -115,7 +147,7 @@ class ChangePacket():
             else:
                 self.dic[ha.hexdigest()] = [srcip, dstip, srcport, dstport]
 
-    def to_change(self, n, srcip_mode, dstip_mode, srcport_mode, dstport_mode):
+    def to_change(self, n, srcip_mode, dstip_mode, srcport_mode, dstport_mode,srcmac_mode,dstmac_mode):
         specify_srcip=self.srcip
         specify_dstip=self.dstip
         specify_srcport=self.srcport
@@ -142,9 +174,12 @@ class ChangePacket():
             if srcip == self.dic[ha.hexdigest()][0]:
                 self.change_ip(i, n, srcip_mode, dstip_mode,specify_srcip,specify_dstip)
                 self.change_port(i, n, srcport_mode, dstport_mode,specify_srcport,specify_dstport)
+                self.change_mac(i, n, srcmac_mode, dstmac_mode,self.srcmac,self.dstmac)
             elif srcip == self.dic[ha.hexdigest()][1]:
                 self.change_ip(i, n, dstip_mode, srcip_mode,specify_dstip,specify_srcip)
                 self.change_port(i, n, dstport_mode, srcport_mode,specify_dstport,specify_srcport)
+                self.change_mac(i, n, dstmac_mode, srcmac_mode,self.dstmac,self.srcmac)
+        
             else:
                 self.not_to_modify+=('无法修改的数据包,序号：'+str(j + 1)+'\n')
                 # print('无法修改', j + 1)
@@ -163,9 +198,10 @@ class ChangePacket():
         self.allpackets += new_packets
 
     def run(self,l3,l2,l5,l13):
+        l3.insert('end', '正在处理..' + '\n')
         s=time.time()
         for i in range(self.count):
-            self.to_change(self.n, self.srcip_mode, self.dstip_mode, self.srcport_mode, self.dstport_mode)
+            self.to_change(self.n, self.srcip_mode, self.dstip_mode, self.srcport_mode, self.dstport_mode,self.srcmac_mode, self.dstmac_mode)
             self.n += 1
         newfilename=str(time.time())+ '.pcap'
         wrpcap(newfilename , self.allpackets)
