@@ -18,7 +18,6 @@ class SendPacetUI:
         title='发送数据包',
         resizable=None,         #设置窗口是否可以更改大小
         alpha=0.9,              #设置窗口的透明度(0.0完全透明）
-        size=(400,480)
         )
         self.window.grab_set()
 
@@ -282,8 +281,6 @@ class SendPacetUI:
         self.franme11.pack(pady=5)
         self.franme22 = ttk.Frame(self.window)
         self.franme22.pack(pady=5)
-        self.franme33 = ttk.Frame(self.window)
-        self.franme33.pack(pady=5)
 
 
         #网卡选项
@@ -361,13 +358,13 @@ class SendPacetUI:
         self.l25=ttk.Entry(self.franme9,validate="focus", validatecommand=(self.check_srcmac2, '%P'))
 
         self.franme10 = ttk.Frame(self.window)
-        self.franme10.pack()
+        self.franme10.pack(pady=5)
         self.l36=ttk.Label(self.franme10,text='目的mac：    ')
         self.l26=ttk.Entry(self.franme10,validate="focus", validatecommand=(self.check_dstmac2, '%P'))
 
 
-        self.l3=ttk.ScrolledText(self.franme33,width=50,height=10)
-        self.l3.pack(side=ttk.LEFT, padx=10)
+        self.l3=ttk.ScrolledText(self.window,width=50,height=10)
+        self.l3.pack(padx=10)
 
 
     def run(self):

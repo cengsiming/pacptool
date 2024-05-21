@@ -19,7 +19,6 @@ class ChangePacetUI:
         title='修改IP和端口',
         resizable=None,         #设置窗口是否可以更改大小
         alpha=0.9,              #设置窗口的透明度(0.0完全透明）
-        size=(340,380)
         )
         self.window.grab_set()
 
@@ -261,10 +260,6 @@ class ChangePacetUI:
         self.franme4.pack(pady=5)
         self.franme3 = ttk.Frame(self.window)
         self.franme3.pack(pady=5)
-        self.franme33 = ttk.Frame(self.window)
-        self.franme33.pack(pady=5)
-
-
         self.l5=ttk.Button(self.franme1,text="选择文件",command=self.open_file)
         self.l5.pack(side='left',padx=5)
         self.l1=ttk.Label(self.franme4)
@@ -326,7 +321,7 @@ class ChangePacetUI:
         self.l26=ttk.Entry(self.franme10,validate="focus", validatecommand=(self.check_dstmac2, '%P'))
 
 
-        self.l3=ttk.ScrolledText(self.franme33,width=40,height=10)
+        self.l3=ttk.ScrolledText(self.window,width=40,height=10)
         self.l3.insert('end','1、支持同时修改多条流'+'\n')
         self.l3.insert('end','2、只有勾选的项才会被修改'+'\n')
         self.l3.insert('end','3、某些协议无法改变IP和端口，比如ARP'+'\n')
@@ -334,8 +329,7 @@ class ChangePacetUI:
         self.l3.insert('end','5、指定IP模式，不支持IPv4和IPv6之间相互转换'+'\n')
         self.l3.insert('end','6、随机IP模式，支持同时修改IPv4和IPv6(多条流)，但不会互相转换'+'\n')
         self.l3.insert('end',"7、某些协议依赖端口进行识别，修改之后可能导致无法识别出原有协议或者识别出原pcap没有的协议"+'\n')
-        self.l3.pack(side=ttk.LEFT, padx=10)
-
+        self.l3.pack(padx=10)
 
     def run(self):
         self.lay()

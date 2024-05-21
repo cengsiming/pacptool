@@ -12,7 +12,7 @@ from send_pacet_UI import SendPacetUI
 
 root = ttk.Window(
     title='Pcaptool',
-    size=(300,470)
+    size=(300,520)
 )
 root.place_window_center()    #让显现出的窗口居中
 # root.wm_attributes('-topmost', 1)  # 让主窗口置顶
