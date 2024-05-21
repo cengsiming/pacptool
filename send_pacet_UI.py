@@ -1,32 +1,28 @@
 import time,re
-
-from changePacket import ChangePacket,ipaddress
+from sendPacket import SendPacket,ipaddress
 import ttkbootstrap as ttk
-from tkinter.filedialog import askopenfilename
-from threading import Thread
+from tkinter.filedialog import askopenfilename,askdirectory
+from threading import Thread,Event
+from scapy.all import get_working_ifaces
 
-
-class ChangePacetUI:
+class SendPacetUI:
     def __init__(self,root):
         # self.window=ttk.Window(
-        # title='修改IP和端口',
+        # title='发送数据包',
         # resizable=None,         #设置窗口是否可以更改大小
         # alpha=0.9,              #设置窗口的透明度(0.0完全透明）
         # )
 
         self.window=ttk.Toplevel(
         master=root,
-        title='修改IP和端口',
+        title='发送数据包',
         resizable=None,         #设置窗口是否可以更改大小
         alpha=0.9,              #设置窗口的透明度(0.0完全透明）
-        size=(340,380)
+        size=(400,480)
         )
         self.window.grab_set()
 
-
-    # # self.window.place_window_center()    #让显现出的窗口居中
-    # # self.window.resizable(False,False)   #让窗口不可更改大小
-    # # self.window.call('tk','scaling',1.333)
+        self.stop_event = Event()
 
         self.srcip = ttk.StringVar()
         self.dstip = ttk.StringVar()
@@ -34,12 +30,12 @@ class ChangePacetUI:
         self.dstport = ttk.StringVar()
         self.srcmac = ttk.StringVar()
         self.dstmac = ttk.StringVar()
-        self.srcip.set("1")
-        self.dstip.set("1")
-        self.srcport.set("1")
-        self.dstport.set("1")
-        self.srcmac.set("1")
-        self.dstmac.set("1")
+        self.srcip.set("0")
+        self.dstip.set("0")
+        self.srcport.set("0")
+        self.dstport.set("0")
+        self.srcmac.set("0")
+        self.dstmac.set("0")
         self.variable_content = [
             [self.srcip, "源IP"],
             [self.dstip, "目的IP"],
@@ -194,46 +190,22 @@ class ChangePacetUI:
             self.change_ensure()
             return False
 
+    def stop_exec(self):
+        self.stop_event.set()
 
-    def ensure(self):
-        # print("count",int(self.l4.get()),"revise_mode=",self.l6.cget('text'),"filepath=",self.filepath,
-        #       "srcip_mode=",int(self.srcip.get()),"dstip_mode=",int(self.dstip.get()),
-        #                     " srcport_mode=",int(self.srcport.get()),"dstport_mode=",int(self.dstport.get()),
-        #       "srcip=",self.l21.get(),"dstip=",self.l22.get(),"srcport=",self.l23.get(),"dstport=",self.l24.get())
-        # return 1
-        try:
-            if not self.l4.get().isdecimal():
-                self.l3.insert('end', "修改次数输入有误" + '\n')
-                return
-            self.l2.config(state='disable')
-            self.l5.config(state='disable')
-            time.sleep(0.2)
-            self.l3.insert('end',"srcip:"+self.filepath+'\n')
-            self.l3.insert('end',"srcip:"+self.srcip.get()+'\n')
-            self.l3.insert('end',"dstip:"+self.dstip.get()+'\n')
-            self.l3.insert('end',"srcport:"+self.srcport.get()+'\n')
-            self.l3.insert('end',"dstport:"+self.dstport.get()+'\n')
-            self.l3.insert('end',"srcmac:"+self.srcmac.get()+'\n')
-            self.l3.insert('end',"dstmac:"+self.dstmac.get()+'\n')
-            self.l3.insert('end','修改次数：'+self.l4.get()+'\n')
-            self.l3.insert('end',"开始执行"+'\n')
-            self.l13.start(200) #间隔默认为200毫秒（5步/秒）
-            self.l3.insert('end',"正在执行"+'\n')
-            tmp=ChangePacket(count=int(self.l4.get()),revise_mode=self.l6.cget('text'),filepath=self.filepath,srcip_mode=int(self.srcip.get()),dstip_mode=int(self.dstip.get()),
-                             srcport_mode=int(self.srcport.get()),dstport_mode=int(self.dstport.get()),srcmac_mode=int(self.srcmac.get()),dstmac_mode=int(self.dstmac.get()),srcip=self.l21.get(),dstip=self.l22.get(),srcport=self.l23.get(),dstport=self.l24.get(),srcmac=self.l25.get(),dstmac=self.l26.get())
-            Thread(target=tmp.run,args=(self.l3,self.l2,self.l5,self.l13)).start()
-        except Exception as e:
-            self.l3.insert('end',str(e)+'\n')
-            self.l3.insert('end',"未知错误"+'\n')
+    #获取选择的网卡
+    def choose_iface(self):
+        iface_index=self.comb.current()
+        if iface_index==-1:#没选择网卡
+            return None
+        iface=get_working_ifaces()[iface_index]
+        return iface
+
 
     def open_file(self):
         path = askopenfilename(title= "Select pcap file", filetypes= (("pcap files", "*.pcap"),("pcap files", "*.pcapng")))
         self.l3.insert('end',path + '\n')
-        # print(path)
-        self.l1.configure(text=path)
-        self.l1.pack(side='left',padx=5)
         if not path:
-            # print('请选择pcap文件')
             self.filepath = ''
             self.l3.insert('end', '请选择pcap文件' + '\n')
             return
@@ -246,11 +218,56 @@ class ChangePacetUI:
             self.l2.config(state='disable')
             self.filepath = ''
             self.l3.insert('end', '文件类型错误' + '\n')
-            # print('文件类型错误')
             return
 
-    def lay(self):
+    def open_dir(self):
+        path = askdirectory(title= "Select pcap dir")
+        self.l3.insert('end',path + '\n')
+        if not path:
+            self.l3.insert('end', '请选择pcap目录' + '\n')
+            self.l2.config(state='disable')
+            return
+        self.filepath=path
+        self.change_ensure()
 
+
+    def ensure(self):
+        try:
+            if not self.l4.get().isdecimal():
+                self.l3.insert('end', "修改次数输入有误" + '\n')
+                return
+            iface = self.choose_iface()
+            if not iface:
+                self.l3.insert('end', "请选择网卡" + '\n')
+                return
+            self.l2.config(state='disable')
+            self.l5.config(state='disable')
+            time.sleep(0.2)
+            self.l3.insert('end',"srcip:"+self.filepath+'\n')
+            self.l3.insert('end',"srcip:"+self.srcip.get()+'\n')
+            self.l3.insert('end',"dstip:"+self.dstip.get()+'\n')
+            self.l3.insert('end',"srcport:"+self.srcport.get()+'\n')
+            self.l3.insert('end',"dstport:"+self.dstport.get()+'\n')
+            self.l3.insert('end',"srcmac:"+self.srcmac.get()+'\n')
+            self.l3.insert('end',"dstmac:"+self.dstmac.get()+'\n')
+            self.l3.insert('end','循环次数：'+self.l4.get()+'\n')
+            self.l3.insert('end',"开始执行"+'\n')
+            self.l13.configure(value=0)
+            self.l3.insert('end',"正在执行"+'\n')
+            self.stop_event.clear()
+            tmp=SendPacket(self.stop_event,iface,self.l44.get(),count=int(self.l4.get()),revise_mode=self.l6.cget('text'),filepath=self.filepath,srcip_mode=int(self.srcip.get()),dstip_mode=int(self.dstip.get()),
+                             srcport_mode=int(self.srcport.get()),dstport_mode=int(self.dstport.get()),srcmac_mode=int(self.srcmac.get()),dstmac_mode=int(self.dstmac.get()),srcip=self.l21.get(),dstip=self.l22.get(),srcport=self.l23.get(),dstport=self.l24.get(),srcmac=self.l25.get(),dstmac=self.l26.get())
+            Thread(target=tmp.run,args=(self.l3,self.l2,self.l5,self.l13)).start()
+        except Exception as e:
+            self.l3.insert('end',str(e)+'\n')
+            self.l3.insert('end',"未知错误"+'\n')
+
+
+
+
+    def lay(self):
+        self.frame0 = ttk.Frame(self.window)
+        self.frame0.pack(pady=5)
         self.franme1 = ttk.Frame(self.window)
         self.franme1.pack(pady=5)
         self.franme4 = ttk.Frame(self.window)
@@ -261,13 +278,29 @@ class ChangePacetUI:
         self.franme4.pack(pady=5)
         self.franme3 = ttk.Frame(self.window)
         self.franme3.pack(pady=5)
+        self.franme11 = ttk.Frame(self.window)
+        self.franme11.pack(pady=5)
+        self.franme22 = ttk.Frame(self.window)
+        self.franme22.pack(pady=5)
         self.franme33 = ttk.Frame(self.window)
         self.franme33.pack(pady=5)
 
 
+        #网卡选项
+        var = ttk.StringVar()
+        ifaces_list=[]
+        for face in get_working_ifaces():
+            ifaces_list.append(face.name)
+        self.label1=ttk.Label(self.frame0,text="网卡选择:",font =("微软雅黑",10),)
+        self.label1.pack(side='left',padx=5)
+        self.comb = ttk.Combobox(self.frame0,textvariable=var,values=ifaces_list)
+        self.comb.pack(side='left',padx=5)
+
+
         self.l5=ttk.Button(self.franme1,text="选择文件",command=self.open_file)
         self.l5.pack(side='left',padx=5)
-        self.l1=ttk.Label(self.franme4)
+        self.l5=ttk.Button(self.franme1,text="选择目录",command=self.open_dir)
+        self.l5.pack(side='left',padx=5)
 
         ttk.Checkbutton(self.franme2, text="源IP", variable=self.variable_content[0][0]).pack(side=ttk.LEFT, padx=5)
         ttk.Checkbutton(self.franme2, text="目的IP", variable=self.variable_content[1][0]).pack(side=ttk.LEFT, padx=5)
@@ -282,15 +315,22 @@ class ChangePacetUI:
         self.l6=ttk.Checkbutton(self.franme1, text="随机",variable=self.random_arg, bootstyle="round-toggle",command=self.specify_arg)
         self.l6.pack(side=ttk.LEFT, padx=5)
 
-        ttk.Label(self.franme3,text='修改次数:').pack(side=ttk.LEFT)
-        self.l4=ttk.Entry(self.franme3,width=3)
+        ttk.Label(self.franme3,text='循环次数:').pack(side=ttk.LEFT)
+        self.l4=ttk.Entry(self.franme3,width=6)
         self.l4.insert('0','1')
         self.l4.pack(side=ttk.LEFT, padx=10)
+        ttk.Label(self.franme3,text='发送速率:').pack(side=ttk.LEFT)
+        self.l44 = ttk.Combobox(self.franme3, width=6,values=['原速','1/4x','1/2x','2x','4x','最高'],state='readonly')
+        self.l44.current(0)  # 首先展示values里面索引的对应的值
+        self.l44.pack(side=ttk.LEFT, padx=10)
 
-        self.l2=ttk.Button(self.franme3,text="确定",state='disable',command=self.ensure)
+        self.l2=ttk.Button(self.franme11,text="确定",state='disable',command=self.ensure)
         self.l2.pack(side=ttk.LEFT, padx=5)
+        self.l22=ttk.Button(self.franme11,text="停止",command=self.stop_exec)
+        self.l22.pack(side=ttk.LEFT, padx=5)
 
-        self.l13 = ttk.Progressbar(self.franme3, bootstyle="primary-striped",mode=ttk.INDETERMINATE)
+        ttk.Label(self.franme22,text='执行进度:  ').pack(side=ttk.LEFT)
+        self.l13 = ttk.Progressbar(self.franme22, length=210,bootstyle="primary-striped")
         self.l13.pack(side=ttk.LEFT)
 
 
@@ -321,19 +361,12 @@ class ChangePacetUI:
         self.l25=ttk.Entry(self.franme9,validate="focus", validatecommand=(self.check_srcmac2, '%P'))
 
         self.franme10 = ttk.Frame(self.window)
-        self.franme10.pack(pady=5)
+        self.franme10.pack()
         self.l36=ttk.Label(self.franme10,text='目的mac：    ')
         self.l26=ttk.Entry(self.franme10,validate="focus", validatecommand=(self.check_dstmac2, '%P'))
 
 
-        self.l3=ttk.ScrolledText(self.franme33,width=40,height=10)
-        self.l3.insert('end','1、支持同时修改多条流'+'\n')
-        self.l3.insert('end','2、只有勾选的项才会被修改'+'\n')
-        self.l3.insert('end','3、某些协议无法改变IP和端口，比如ARP'+'\n')
-        self.l3.insert('end','4、支持指定源目IP、端口；如果输入为空，表示该项随机'+'\n')
-        self.l3.insert('end','5、指定IP模式，不支持IPv4和IPv6之间相互转换'+'\n')
-        self.l3.insert('end','6、随机IP模式，支持同时修改IPv4和IPv6(多条流)，但不会互相转换'+'\n')
-        self.l3.insert('end',"7、某些协议依赖端口进行识别，修改之后可能导致无法识别出原有协议或者识别出原pcap没有的协议"+'\n')
+        self.l3=ttk.ScrolledText(self.franme33,width=50,height=10)
         self.l3.pack(side=ttk.LEFT, padx=10)
 
 
@@ -344,5 +377,5 @@ class ChangePacetUI:
 
 
 if __name__ == '__main__':
-    aaa=ChangePacetUI(1)
+    aaa=SendPacetUI(1)
     aaa.run()

@@ -8,7 +8,7 @@ class MachProto_danger_ui:
 
         self.window=ttk.Toplevel(
         master=root,
-        title='对比pcap',
+        title='生成标准协议和威胁报文',
         resizable=None,         #设置窗口是否可以更改大小
         alpha=0.9,              #设置窗口的透明度(0.0完全透明）
         )
