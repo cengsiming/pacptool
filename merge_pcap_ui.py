@@ -26,8 +26,11 @@ class Merge_ui:
         li = []
         self.l4.insert('end', '正在处理..' + '\n')
         for i in file_list:
-            a = rdpcap(i)
-            li.extend(a)
+            try:
+                a = rdpcap(i)
+                li.extend(a)
+            except:
+                self.l4.insert('end', i+"：数据包错误！" + '\n')
         name=f'{time.time()}.pcap'
         wrpcap(f"./{name}", li)
         self.l4.insert('end', '完成！' + '\n')

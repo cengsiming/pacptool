@@ -160,7 +160,7 @@ class SendPacket():
                 srcip = i.payload.src
                 dstip = i.payload.dst
             except:
-                self.not_to_modify+=('无法修改,序号：'+str(j + 1)+'\n')
+                self.not_to_modify+=('无法获取IP,序号：'+str(j + 1)+'\n')
                 # print('无法修改,序号：',j + 1)
                 srcip = ""
                 dstip = ""
@@ -261,24 +261,32 @@ class SendPacket():
         self.l13 = l13 # 进度条
         l3.insert('end', '开始发送流量..' + '\n')
         if self.count == 1000000:
-            self.total_number = "无线循环" # 需要发送的总包数
+            self.total_number = "无限循环" # 需要发送的总包数
             self.l13.start()
         else:            
             self.total_number = self.count*len(self.original_packets) # 需要发送的总包数
             self.once_step = float(100/self.total_number) # 每次发送后进度条的步长
         l3.insert('end', '需要发送的总包数：'+ str(self.total_number) + '\n')
         s=time.time()
-        for _ in range(self.count):
-            if self.stop_event.is_set():
-                l3.insert('end', "捕捉到停止信号,停止执行\n")
-                break
-            if (not self.srcip_mode) and  (not self.dstip_mode) and (not self.srcport_mode) and  (not self.dstport_mode) and (not self.srcmac_mode) and (not self.dstmac_mode):
-                # 不需要修改直接发送
-                self.not_to_change()
-            else:
-                # 需要修改后再发送
-                self.to_change(self.n, self.srcip_mode, self.dstip_mode, self.srcport_mode, self.dstport_mode,self.srcmac_mode, self.dstmac_mode)
-                self.n += 1
+        try:
+            for _ in range(self.count):
+                if self.stop_event.is_set():
+                    l3.insert('end', "捕捉到停止信号,停止执行\n")
+                    break
+                if (not self.srcip_mode) and  (not self.dstip_mode) and (not self.srcport_mode) and  (not self.dstport_mode) and (not self.srcmac_mode) and (not self.dstmac_mode):
+                    # 不需要修改直接发送
+                    print("不需要修改直接发送")
+                    self.not_to_change()
+                else:
+                    # 需要修改后再发送
+                    print("需要修改后再发送")
+                    self.to_change(self.n, self.srcip_mode, self.dstip_mode, self.srcport_mode, self.dstport_mode,self.srcmac_mode, self.dstmac_mode)
+                    self.n += 1
+        except Exception as e:
+            l3.insert('end', "发包异常\n")
+            l3.insert('end', str(e) + '\n')
+            if "文件名、目录名或卷标语法不正确" in str(e):
+                l3.insert('end', "请检查网卡名\n")
         l3.insert('end', self.not_to_modify + '\n')
         l3.insert('end', "执行完毕\n")
         l3.insert('end', "实际发送包数"+str(self.send_num)+"\n")

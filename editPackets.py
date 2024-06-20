@@ -97,12 +97,12 @@ class EditPackets:
         self.table.heading('Protocol', text='Protocol', )  # 定义表头
         self.table.heading('Length', text='Length', )  # 定义表头
         self.table.heading('Info', text='Info', )  # 定义表头
-        self.table.column('No', width=70, minwidth=0, anchor=S)  # 定义列
-        self.table.column('Source', width=150, minwidth=0, anchor=S)  # 定义列
-        self.table.column('Destination', width=150, minwidth=0, anchor=S)  # 定义列
-        self.table.column('Protocol', width=100, minwidth=0, anchor=S)  # 定义列
-        self.table.column('Length', width=70, minwidth=0, anchor=S)  # 定义列
-        self.table.column('Info', width=310, minwidth=0, anchor=S)  # 定义列
+        self.table.column('No', width=70, minwidth=10, anchor=S)  # 定义列
+        self.table.column('Source', width=150, minwidth=10, anchor=S)  # 定义列
+        self.table.column('Destination', width=150, minwidth=10, anchor=S)  # 定义列
+        self.table.column('Protocol', width=100, minwidth=10, anchor=S)  # 定义列
+        self.table.column('Length', width=70, minwidth=10, anchor=S)  # 定义列
+        self.table.column('Info', width=310, minwidth=10, anchor=S)  # 定义列
         self.table.pack(side=LEFT, fill=Y)
 
     def save_pcap(self):

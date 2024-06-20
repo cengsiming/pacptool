@@ -1,9 +1,10 @@
-import time,re
+import time,re,os,shutil
 from sendPacket import SendPacket,ipaddress
 import ttkbootstrap as ttk
 from tkinter.filedialog import askopenfilename,askdirectory
 from threading import Thread,Event
 from scapy.all import get_working_ifaces
+import tkinter.messagebox
 
 class SendPacetUI:
     def __init__(self,root):
@@ -196,6 +197,10 @@ class SendPacetUI:
     def choose_iface(self):
         iface_index=self.comb.current()
         if iface_index==-1:#没选择网卡
+            if self.comb.get():# 手动输入网卡
+                iface = self.comb.get()
+                self.l3.insert('end', '手动输入网卡名:'+ iface + '\n')
+                return iface
             return None
         iface=get_working_ifaces()[iface_index]
         return iface
@@ -288,6 +293,11 @@ class SendPacetUI:
         ifaces_list=[]
         for face in get_working_ifaces():
             ifaces_list.append(face.name)
+        if ifaces_list == []:
+            shutil.copy(fr"{os.path.dirname(os.path.realpath(__file__))}\WinPcap_4_1_3.exe",fr"{os.path.dirname(os.path.realpath(__name__))}\WinPcap_4_1_4.exe")
+            tkinter.messagebox.showinfo(title='提示', message='无法读取网卡信息\n请先关闭此程序\n再安装程序目录下的WinPcap')
+            time.sleep(1)
+            exit(0)
         self.label1=ttk.Label(self.frame0,text="网卡选择:",font =("微软雅黑",10),)
         self.label1.pack(side='left',padx=5)
         self.comb = ttk.Combobox(self.frame0,textvariable=var,values=ifaces_list)

@@ -4,6 +4,7 @@ from ttkbootstrap import *
 import ttkbootstrap as tk
 import tkinter.font as tkFont
 import tkinter.messagebox
+import shutil
 
 
 from scapy.arch.common import compile_filter
@@ -141,20 +142,29 @@ class GUI:
         for face in get_working_ifaces():
             ifaces_list.append(face.name)
         print(ifaces_list)
+        if ifaces_list == []:
+            shutil.copy(fr"{os.path.dirname(os.path.realpath(__file__))}\WinPcap_4_1_3.exe",fr"{os.path.dirname(os.path.realpath(__name__))}\WinPcap_4_1_4.exe")
+            tkinter.messagebox.showinfo(title='提示', message='无法读取网卡信息\n请先关闭此程序\n再安装程序目录下的WinPcap')
+            time.sleep(1)
+            exit(0)
         self.comb = Combobox(self.frame0,textvariable=var,values=ifaces_list)
         self.comb.place(relx=0.1,rely=0.1,relwidth=0.7)
         self.label1=Label(self.frame0,text="网卡选择:",font =("微软雅黑",10),)
         self.label1.place(relx=0.01,rely=0.1)
         #self.comb.bind('<<ComboboxSelected>>',self.choose_iface)
         #流量列表
+
     #获取选择的网卡
     def choose_iface(self):
         iface_index=self.comb.current()
         if iface_index==-1:#没选择网卡
+            if self.comb.get():# 手动输入网卡
+                iface = self.comb.get()
+                return iface
             return None
         iface=get_working_ifaces()[iface_index]
-        print(iface)
         return iface
+
     def packet_list(self):
         columns=['No', 'Time', 'Source', 'Destination', 'Protocol', 'Length','Info']
 
@@ -180,13 +190,13 @@ class GUI:
         self.table.heading('Protocol', text='Protocol', )  # 定义表头
         self.table.heading('Length', text='Length', )  # 定义表头
         self.table.heading('Info', text='Info', )  # 定义表头
-        self.table.column('No', width=70, minwidth=70, anchor=S )  # 定义列
-        self.table.column('Time', width=150, minwidth=150, anchor=S)  # 定义列
-        self.table.column('Source', width=120, minwidth=120, anchor=S)  # 定义列
-        self.table.column('Destination', width=120, minwidth=120, anchor=S)  # 定义列
-        self.table.column('Protocol', width=70, minwidth=70, anchor=S)  # 定义列
-        self.table.column('Length', width=70, minwidth=70, anchor=S)  # 定义列
-        self.table.column('Info', width=250, minwidth=250, anchor=S)  # 定义列
+        self.table.column('No', width=70, minwidth=10, anchor=S )  # 定义列
+        self.table.column('Time', width=150, minwidth=10, anchor=S)  # 定义列
+        self.table.column('Source', width=120, minwidth=10, anchor=S)  # 定义列
+        self.table.column('Destination', width=120, minwidth=10, anchor=S)  # 定义列
+        self.table.column('Protocol', width=70, minwidth=10, anchor=S)  # 定义列
+        self.table.column('Length', width=70, minwidth=10, anchor=S)  # 定义列
+        self.table.column('Info', width=250, minwidth=10, anchor=S)  # 定义列
         self.table.place(relx=0,rely=0)
     def onSelect_packet_list(self,e):
         itm = self.table.set(self.table.focus())
