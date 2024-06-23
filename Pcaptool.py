@@ -14,47 +14,46 @@ root = ttk.Window(
     title='Pcaptool',
     size=(300,520)
 )
-root.place_window_center()    #让显现出的窗口居中
-# root.wm_attributes('-topmost', 1)  # 让主窗口置顶
+root.place_window_center()  
 root.call('tk', 'scaling', 1.333)
 
 def ip_port():
-    # print(ttk.Style().theme_names())#可设置主题风格['cyborg', 'journal', 'darkly', 'flatly', 'solar', 'minty', 'litera', 'united', 'pulse', 'cosmo', 'lumen', 'yeti', 'superhero']
+ 
     viewobject = ChangePacetUI(root)
     viewobject.run()
 
 def com_packet():
-    # print(ttk.Style().theme_names())#可设置主题风格['cyborg', 'journal', 'darkly', 'flatly', 'solar', 'minty', 'litera', 'united', 'pulse', 'cosmo', 'lumen', 'yeti', 'superhero']
+    
     viewobject = Compare_ui(root)
     viewobject.layout_1()
 
 def edit_packets():
-    # print(ttk.Style().theme_names())#可设置主题风格['cyborg', 'journal', 'darkly', 'flatly', 'solar', 'minty', 'litera', 'united', 'pulse', 'cosmo', 'lumen', 'yeti', 'superhero']
+   
     viewobject = EditPackets(root)
     viewobject.run()
 
 def merge_pcap():
-    # print(ttk.Style().theme_names())#可设置主题风格['cyborg', 'journal', 'darkly', 'flatly', 'solar', 'minty', 'litera', 'united', 'pulse', 'cosmo', 'lumen', 'yeti', 'superhero']
+   
     viewobject = Merge_ui(root)
     viewobject.layout_1()
 
 def split_pcap():
-    # print(ttk.Style().theme_names())#可设置主题风格['cyborg', 'journal', 'darkly', 'flatly', 'solar', 'minty', 'litera', 'united', 'pulse', 'cosmo', 'lumen', 'yeti', 'superhero']
+ 
     viewobject = Split_ui(root)
     viewobject.layout_1()
 
 def mach_Proto_danger():
-    # print(ttk.Style().theme_names())#可设置主题风格['cyborg', 'journal', 'darkly', 'flatly', 'solar', 'minty', 'litera', 'united', 'pulse', 'cosmo', 'lumen', 'yeti', 'superhero']
+ 
     viewobject = MachProto_danger_ui(root)
     viewobject.layout_1()
 
 def changeTime():
-    # print(ttk.Style().theme_names())#可设置主题风格['cyborg', 'journal', 'darkly', 'flatly', 'solar', 'minty', 'litera', 'united', 'pulse', 'cosmo', 'lumen', 'yeti', 'superhero']
+  
     viewobject = ChangeTime_ui(root)
     viewobject.layout_1()
 
 def sniffPcap():
-    # print(ttk.Style().theme_names())#可设置主题风格['cyborg', 'journal', 'darkly', 'flatly', 'solar', 'minty', 'litera', 'united', 'pulse', 'cosmo', 'lumen', 'yeti', 'superhero']
+   
     GUI(root)
 
 def scan_packets():
@@ -77,7 +76,7 @@ ttk.Button(text="修改pcap时间戳 ",bootstyle='secondary',command=changeTime)
 ttk.Button(text="拆分pcap为多条流 ",bootstyle='success', command=split_pcap).pack(pady=10)
 ttk.Button(text="对比两个pcap文件 ",bootstyle='warning', command=com_packet).pack(pady=10)
 ttk.Button(text="pcap字段编辑工具 ",bootstyle='dark',command=edit_packets).pack(pady=10)
-ttk.Button(text="修改pcap的IP和端口 ",bootstyle='primary', command=ip_port).pack(pady=10)
+ttk.Button(text="修改pcap的六元组 ",bootstyle='primary', command=ip_port).pack(pady=10)
 ttk.Button(text="生成标准协议和威胁报文 ",bootstyle='danger',command=mach_Proto_danger).pack(pady=10)
 
 

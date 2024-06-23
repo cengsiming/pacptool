@@ -5,6 +5,10 @@ from tkinter.filedialog import askopenfilename,askdirectory
 from threading import Thread,Event
 from scapy.all import get_working_ifaces
 import tkinter.messagebox
+import send_packet_rs
+
+
+
 
 class SendPacetUI:
     def __init__(self,root):
@@ -257,11 +261,18 @@ class SendPacetUI:
             self.l3.insert('end','循环次数：'+self.l4.get()+'\n')
             self.l3.insert('end',"开始执行"+'\n')
             self.l13.configure(value=0)
-            self.l3.insert('end',"正在执行"+'\n')
             self.stop_event.clear()
-            tmp=SendPacket(self.stop_event,iface,self.l44.get(),count=int(self.l4.get()),revise_mode=self.l6.cget('text'),filepath=self.filepath,srcip_mode=int(self.srcip.get()),dstip_mode=int(self.dstip.get()),
-                             srcport_mode=int(self.srcport.get()),dstport_mode=int(self.dstport.get()),srcmac_mode=int(self.srcmac.get()),dstmac_mode=int(self.dstmac.get()),srcip=self.l21.get(),dstip=self.l22.get(),srcport=self.l23.get(),dstport=self.l24.get(),srcmac=self.l25.get(),dstmac=self.l26.get())
-            Thread(target=tmp.run,args=(self.l3,self.l2,self.l5,self.l13)).start()
+            if self.l44.get()=='极限':
+                Thread(target=send_packet_rs.to_send_packet,args=(self.filepath,int(self.l4.get()),str(iface),bool(int(self.srcmac.get())),bool(int(self.dstmac.get())),bool(int(self.srcip.get())),bool(int(self.dstip.get())),bool(int(self.srcport.get())),bool(int(self.dstport.get())))).start()
+                print("极限发包")
+                time.sleep(0.5)
+                self.l2.config(state='')
+                self.l5.config(state='')
+            else:
+                self.l3.insert('end',"正在执行"+'\n')
+                tmp=SendPacket(self.stop_event,iface,self.l44.get(),count=int(self.l4.get()),revise_mode=self.l6.cget('text'),filepath=self.filepath,srcip_mode=int(self.srcip.get()),dstip_mode=int(self.dstip.get()),
+                                srcport_mode=int(self.srcport.get()),dstport_mode=int(self.dstport.get()),srcmac_mode=int(self.srcmac.get()),dstmac_mode=int(self.dstmac.get()),srcip=self.l21.get(),dstip=self.l22.get(),srcport=self.l23.get(),dstport=self.l24.get(),srcmac=self.l25.get(),dstmac=self.l26.get())
+                Thread(target=tmp.run,args=(self.l3,self.l2,self.l5,self.l13)).start()
         except Exception as e:
             self.l3.insert('end',str(e)+'\n')
             self.l3.insert('end',"未知错误"+'\n')
@@ -327,7 +338,7 @@ class SendPacetUI:
         self.l4.insert('0','1')
         self.l4.pack(side=ttk.LEFT, padx=10)
         ttk.Label(self.franme3,text='发送速率:').pack(side=ttk.LEFT)
-        self.l44 = ttk.Combobox(self.franme3, width=6,values=['原速','1/4x','1/2x','2x','4x','最高'],state='readonly')
+        self.l44 = ttk.Combobox(self.franme3, width=6,values=['原速','1/4x','1/2x','2x','4x','最高','极限'],state='readonly')
         self.l44.current(0)  # 首先展示values里面索引的对应的值
         self.l44.pack(side=ttk.LEFT, padx=10)
 
@@ -374,6 +385,10 @@ class SendPacetUI:
 
 
         self.l3=ttk.ScrolledText(self.window,width=50,height=10)
+        self.l3.insert('end',"大于1514字节的数据包将不会被发送"+'\n')
+        self.l3.insert('end',"极限模式下文件路径不能携带中文"+'\n')
+        self.l3.insert('end',"极限模式下网卡可能会丢包"+'\n')
+        self.l3.insert('end',"极限模式最大支持4G大小的pcap文件"+'\n')
         self.l3.pack(padx=10)
 
 

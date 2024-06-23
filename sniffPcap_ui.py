@@ -160,6 +160,7 @@ class GUI:
         if iface_index==-1:#没选择网卡
             if self.comb.get():# 手动输入网卡
                 iface = self.comb.get()
+                self.l3.insert('end', '手动输入网卡名:'+ iface + '\n')
                 return iface
             return None
         iface=get_working_ifaces()[iface_index]

@@ -16,7 +16,7 @@ class ChangePacetUI:
 
         self.window=ttk.Toplevel(
         master=root,
-        title='修改IP和端口',
+        title='修改pcap的六元组',
         resizable=None,         #设置窗口是否可以更改大小
         alpha=0.9,              #设置窗口的透明度(0.0完全透明）
         )
