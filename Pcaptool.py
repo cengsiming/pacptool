@@ -67,7 +67,6 @@ def send_packets():
     viewobject = SendPacetUI(root)
     viewobject.run()
 
-
 ttk.Button(text="扫描器 ",bootstyle="light", command=scan_packets).pack(pady=10)
 ttk.Button(text="网络嗅探 ",bootstyle="dark-outline", command=sniffPcap).pack(pady=10)
 ttk.Button(text="发送数据包 ",bootstyle="dark-outline", command=send_packets).pack(pady=10)

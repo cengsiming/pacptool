@@ -210,7 +210,7 @@ class EditPackets:
                     self.tempacket[self.parent_layer].setfieldval(self.new_values[0].split(':')[0].strip(),self.new_values[0].split(':')[1].strip())
                     # setattr(self.tempacket[self.parent_layer], self.new_values[0].split(':')[0], self.new_values[0].split(':')[1])
             except Exception as e:
-                showwarning(title='', message=f'修改失败'+str(e))
+                showwarning(title='', message='修改失败'+str(e))
 
                 # self.tempacket[self.parent_layer].setfieldval(self.new_values[0].split(':')[0],
                 #                                                             int(self.new_values[0].split(':')[1]))

@@ -1,7 +1,5 @@
-import time
 from tkinter.filedialog import askopenfilename
 import ttkbootstrap as ttk
-from compare_pcap import start_run,wirte_result2
 from threading import Thread
 from splitFlow import SplitFlow
 

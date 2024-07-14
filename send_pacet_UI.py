@@ -1,4 +1,7 @@
-import time,re,os,shutil
+import time
+import re
+import os
+import shutil
 from sendPacket import SendPacket,ipaddress
 import ttkbootstrap as ttk
 from tkinter.filedialog import askopenfilename,askdirectory
@@ -263,7 +266,10 @@ class SendPacetUI:
             self.l13.configure(value=0)
             self.stop_event.clear()
             if self.l44.get()=='极限':
-                Thread(target=send_packet_rs.to_send_packet,args=(self.filepath,int(self.l4.get()),str(iface),bool(int(self.srcmac.get())),bool(int(self.dstmac.get())),bool(int(self.srcip.get())),bool(int(self.dstip.get())),bool(int(self.srcport.get())),bool(int(self.dstport.get())))).start()
+                mac = bool(int(self.srcmac.get())) or bool(int(self.dstmac.get()))
+                ip = bool(int(self.srcip.get())) or bool(int(self.dstip.get()))
+                port = bool(int(self.srcport.get())) or bool(int(self.dstport.get()))
+                Thread(target=send_packet_rs.to_send_packet,args=(self.filepath,int(self.l4.get()),str(iface),mac,ip,port)).start()
                 print("极限发包")
                 time.sleep(0.5)
                 self.l2.config(state='')

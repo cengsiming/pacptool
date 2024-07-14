@@ -1,4 +1,5 @@
-import time,re
+import time
+import re
 
 from changePacket import ChangePacket,ipaddress
 import ttkbootstrap as ttk
