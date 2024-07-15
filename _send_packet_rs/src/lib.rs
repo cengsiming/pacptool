@@ -1,10 +1,12 @@
 use pcap;
 use pyo3::prelude::*;
 use pyo3::wrap_pyfunction;
+use std::fs;
 
 #[pyfunction]
 fn to_send_packet(file_path: &str, count: i32, iface: &str, mac: bool, ip: bool, port: bool) {
     let buf_vec = read_pcap(file_path);
+    println!("读取pcap完毕!");
     let count2: i32;
     if count == 0 {
         count2 = 100000;
@@ -16,14 +18,52 @@ fn to_send_packet(file_path: &str, count: i32, iface: &str, mac: bool, ip: bool,
 }
 
 fn read_pcap(filepath: &str) -> Vec<Vec<u8>> {
-    let mut cap1 = pcap::Capture::from_file(filepath).unwrap();
     let mut buf_vec: Vec<Vec<u8>> = Vec::new(); // 创建一个 Vec<Vec<u8>> 来存储所有包的数据
-    while let Ok(packet) = cap1.next_packet() {
-        if packet.len() <= 1514 {
-            let packet_data: Vec<u8> = packet.data.to_vec(); // 创建一个新的 Vec<u8> 来存储当前包的数据
-            buf_vec.push(packet_data); // 将当前包的数据添加到 buf_vec 中
+    if filepath.ends_with(".pcap") || filepath.ends_with(".cap") || filepath.ends_with(".pcapng"){
+        println!("读取文件:{}",filepath);
+        let mut cap1 = pcap::Capture::from_file(filepath).unwrap();
+        while let Ok(packet) = cap1.next_packet() {
+            if packet.len() <= 1514 {
+                let packet_data: Vec<u8> = packet.data.to_vec(); // 创建一个新的 Vec<u8> 来存储当前包的数据
+                buf_vec.push(packet_data); // 将当前包的数据添加到 buf_vec 中
+            }
+        }
+    }else{
+        // 获取目录中的所有条目
+        match fs::read_dir(filepath) {
+            Ok(entries) => {
+                for entry in entries {
+                    match entry {
+                        Ok(entry) => {
+                            let path = entry.path();
+                            if path.is_file() {
+                                // 打印文件的绝对路径
+                                let  file_name = path.to_str();
+                                match file_name {
+                                    Some(filepath) => {
+                                        if filepath.ends_with(".pcap") || filepath.ends_with(".cap") || filepath.ends_with(".pcapng"){
+                                            println!("读取文件:{}",filepath);
+                                            let mut cap1 = pcap::Capture::from_file(filepath).unwrap();
+                                            while let Ok(packet) = cap1.next_packet() {
+                                                if packet.len() <= 1514 {
+                                                    let packet_data: Vec<u8> = packet.data.to_vec(); // 创建一个新的 Vec<u8> 来存储当前包的数据
+                                                    buf_vec.push(packet_data); // 将当前包的数据添加到 buf_vec 中
+                                                }
+                                            }
+                                        }
+                                    },
+                                    _ => {}                     
+                                }
+                            }
+                        }
+                        Err(e) => println!("Error reading entry: {}", e),
+                    }
+                }
+            }
+            Err(e) => println!("Error reading directory: {}", e),
         }
     }
+    
     buf_vec
 }
 
@@ -38,7 +78,7 @@ fn send_packet(
     let mut cap: pcap::Capture<pcap::Active> =
         pcap::Capture::from_device(iface).unwrap().open().unwrap();
     let mut sq = pcap::sendqueue::SendQueue::new(4294967295).unwrap();
-    for _ in 0..count {
+    for c in 0..count {
         for i in buf_vec.iter_mut() {
             if mac {
                 // 修改源mac
@@ -184,9 +224,10 @@ fn send_packet(
                 }
             }
             sq.queue(None, &i).unwrap();
-            sq.transmit(&mut cap, pcap::sendqueue::SendSync::Off)
-                .unwrap_or_else(|_| println!("发送数据包出错!"));
         }
+        println!("正在发送第{}轮..",c+1);
+        sq.transmit(&mut cap, pcap::sendqueue::SendSync::On).unwrap();
+        println!("done!");
     }
 }
 
