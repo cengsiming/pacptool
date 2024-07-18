@@ -1,69 +1,49 @@
 use pcap;
 use pyo3::prelude::*;
 use pyo3::wrap_pyfunction;
-use std::fs;
 
 #[pyfunction]
-fn to_send_packet(file_path: &str, count: i32, iface: &str, mac: bool, ip: bool, port: bool) {
+fn to_send_packet(
+    file_path: &str,
+    count: i32,
+    iface: &str,
+    srcmac: bool,
+    dstmac: bool,
+    srcip: bool,
+    dstip: bool,
+    srcport: bool,
+    dstport: bool,
+) {
     let buf_vec = read_pcap(file_path);
-    println!("读取pcap完毕!");
-    let count2: i32;
-    if count == 0 {
+    let count2:i32;
+    if count == 0{
         count2 = 100000;
-    } else {
+    }else{
         count2 = count;
     }
-    send_packet(count2, iface, buf_vec, mac, ip, port);
+    send_packet(
+        count2,
+        iface,
+        buf_vec,
+        srcmac,
+        dstmac,
+        srcip,
+        dstip,
+        srcport,
+        dstport,
+    );
     println!("发送完毕!")
 }
 
 fn read_pcap(filepath: &str) -> Vec<Vec<u8>> {
+    let mut cap1 = pcap::Capture::from_file(filepath).unwrap();
     let mut buf_vec: Vec<Vec<u8>> = Vec::new(); // 创建一个 Vec<Vec<u8>> 来存储所有包的数据
-    if filepath.ends_with(".pcap") || filepath.ends_with(".cap") || filepath.ends_with(".pcapng"){
-        println!("读取文件:{}",filepath);
-        let mut cap1 = pcap::Capture::from_file(filepath).unwrap();
-        while let Ok(packet) = cap1.next_packet() {
-            if packet.len() <= 1514 {
-                let packet_data: Vec<u8> = packet.data.to_vec(); // 创建一个新的 Vec<u8> 来存储当前包的数据
-                buf_vec.push(packet_data); // 将当前包的数据添加到 buf_vec 中
-            }
-        }
-    }else{
-        // 获取目录中的所有条目
-        match fs::read_dir(filepath) {
-            Ok(entries) => {
-                for entry in entries {
-                    match entry {
-                        Ok(entry) => {
-                            let path = entry.path();
-                            if path.is_file() {
-                                // 打印文件的绝对路径
-                                let  file_name = path.to_str();
-                                match file_name {
-                                    Some(filepath) => {
-                                        if filepath.ends_with(".pcap") || filepath.ends_with(".cap") || filepath.ends_with(".pcapng"){
-                                            println!("读取文件:{}",filepath);
-                                            let mut cap1 = pcap::Capture::from_file(filepath).unwrap();
-                                            while let Ok(packet) = cap1.next_packet() {
-                                                if packet.len() <= 1514 {
-                                                    let packet_data: Vec<u8> = packet.data.to_vec(); // 创建一个新的 Vec<u8> 来存储当前包的数据
-                                                    buf_vec.push(packet_data); // 将当前包的数据添加到 buf_vec 中
-                                                }
-                                            }
-                                        }
-                                    },
-                                    _ => {}                     
-                                }
-                            }
-                        }
-                        Err(e) => println!("Error reading entry: {}", e),
-                    }
-                }
-            }
-            Err(e) => println!("Error reading directory: {}", e),
+    while let Ok(packet) = cap1.next_packet() {
+        if packet.len() <= 1514 {
+            let packet_data: Vec<u8> = packet.data.to_vec(); // 创建一个新的 Vec<u8> 来存储当前包的数据
+            buf_vec.push(packet_data); // 将当前包的数据添加到 buf_vec 中
         }
     }
-    
     buf_vec
 }
 
@@ -71,16 +51,19 @@ fn send_packet(
     count: i32,
     iface: &str,
     mut buf_vec: Vec<Vec<u8>>,
-    mac: bool,
-    ip: bool,
-    port: bool,
+    srcmac: bool,
+    dstmac: bool,
+    srcip: bool,
+    dstip: bool,
+    srcport: bool,
+    dstport: bool,
 ) {
     let mut cap: pcap::Capture<pcap::Active> =
         pcap::Capture::from_device(iface).unwrap().open().unwrap();
     let mut sq = pcap::sendqueue::SendQueue::new(4294967295).unwrap();
-    for c in 0..count {
+    for _ in 0..count {
         for i in buf_vec.iter_mut() {
-            if mac {
+            if srcmac {
                 // 修改源mac
                 i[5] = i[5] % 255 + 1;
                 if i[5] == 1 {
@@ -98,6 +81,8 @@ fn send_packet(
                         }
                     }
                 }
+            }
+            if dstmac {
                 // 修改目的mac
                 i[11] = i[11] % 255 + 1;
                 if i[11] == 1 {
@@ -118,8 +103,8 @@ fn send_packet(
             }
             if i[12] == 8 && i[13] == 0 {
                 //判断为IPv4
-                if ip {
-                    // 修改源IPv4
+                // 修改源IPv4
+                if srcip {
                     i[29] = i[29] % 255 + 1;
                     if i[29] == 1 {
                         i[28] = i[28] % 255 + 1;
@@ -130,6 +115,8 @@ fn send_packet(
                             }
                         }
                     }
+                }
+                if dstip {
                     // 修改目的IPv4
                     i[33] = i[33] % 255 + 1;
                     if i[33] == 1 {
@@ -142,14 +129,16 @@ fn send_packet(
                         }
                     }
                 }
-                if port {
-                    //修改端口
-                    if i[23] == 6 || i[23] == 17 {
+                //修改端口
+                if i[23] == 6 || i[23] == 17 {
+                    if srcport {
                         //修改源端口
                         i[35] = i[35] % 255 + 1;
                         if i[35] == 1 {
                             i[34] = i[34] % 255 + 1;
                         }
+                    }
+                    if dstport {
                         //修改目的端口
                         i[37] = i[37] % 255 + 1;
                         if i[37] == 1 {
@@ -157,34 +146,38 @@ fn send_packet(
                         }
                     }
                 }
-            } else if i[12] == 8 && i[13] == 6 && ip {
+            } else if i[12] == 8 && i[13] == 6 {
                 //判断为ARP
-                // 修改源IP
-                i[31] = i[31] % 255 + 1;
-                if i[31] == 1 {
-                    i[30] = i[30] % 255 + 1;
-                    if i[30] == 1 {
-                        i[29] = i[29] % 255 + 1;
-                        if i[29] == 1 {
-                            i[28] = i[28] % 255 + 1;
+                if srcip {
+                    // 修改源IP
+                    i[31] = i[31] % 255 + 1;
+                    if i[31] == 1 {
+                        i[30] = i[30] % 255 + 1;
+                        if i[30] == 1 {
+                            i[29] = i[29] % 255 + 1;
+                            if i[29] == 1 {
+                                i[28] = i[28] % 255 + 1;
+                            }
                         }
                     }
                 }
-                // 修改目的IP
-                i[41] = i[41] % 255 + 1;
-                if i[41] == 1 {
-                    i[40] = i[40] % 255 + 1;
-                    if i[40] == 1 {
-                        i[39] = i[39] % 255 + 1;
-                        if i[39] == 1 {
-                            i[38] = i[38] % 255 + 1;
+                if dstip {
+                    // 修改目的IP
+                    i[41] = i[41] % 255 + 1;
+                    if i[41] == 1 {
+                        i[40] = i[40] % 255 + 1;
+                        if i[40] == 1 {
+                            i[39] = i[39] % 255 + 1;
+                            if i[39] == 1 {
+                                i[38] = i[38] % 255 + 1;
+                            }
                         }
                     }
                 }
             } else if i[12] == 134 && i[13] == 221 {
                 // 判断为ipv6
-                if ip {
-                    // 修改源IPv6
+                // 修改源IPv6
+                if srcip {
                     i[37] = i[37] % 255 + 1;
                     if i[37] == 1 {
                         i[36] = i[36] % 255 + 1;
@@ -195,6 +188,8 @@ fn send_packet(
                             }
                         }
                     }
+                }
+                if dstip {
                     // 修改目的IPv6
                     i[53] = i[53] % 255 + 1;
                     if i[53] == 1 {
@@ -207,14 +202,16 @@ fn send_packet(
                         }
                     }
                 }
-                if port {
-                    //修改端口
-                    if i[20] == 6 || i[20] == 17 {
+                //修改端口
+                if i[20] == 6 || i[20] == 17 {
+                    if srcport {
                         //修改源端口
                         i[55] = i[55] % 255 + 1;
                         if i[55] == 1 {
                             i[54] = i[54] % 255 + 1;
                         }
+                    }
+                    if dstport {
                         //修改目的端口
                         i[57] = i[57] % 255 + 1;
                         if i[57] == 1 {
@@ -222,12 +219,13 @@ fn send_packet(
                         }
                     }
                 }
+            } else {
+                // println!("非IP或ARP协议")
             }
             sq.queue(None, &i).unwrap();
         }
-        println!("正在发送第{}轮..",c+1);
-        sq.transmit(&mut cap, pcap::sendqueue::SendSync::On).unwrap();
-        println!("done!");
+        sq.transmit(&mut cap, pcap::sendqueue::SendSync::Off)
+            .unwrap_or_else(|_| println!("发送数据包出错!"));
     }
 }
 

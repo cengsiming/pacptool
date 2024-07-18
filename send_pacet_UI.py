@@ -1,7 +1,4 @@
-import time
-import re
-import os
-import shutil
+import time,re,os,shutil
 from sendPacket import SendPacket,ipaddress
 import ttkbootstrap as ttk
 from tkinter.filedialog import askopenfilename,askdirectory
@@ -21,13 +18,14 @@ class SendPacetUI:
         # alpha=0.9,              #设置窗口的透明度(0.0完全透明）
         # )
 
-        self.window=ttk.Toplevel(
-        master=root,
-        title='发送数据包',
-        resizable=None,         #设置窗口是否可以更改大小
-        alpha=0.9,              #设置窗口的透明度(0.0完全透明）
-        )
-        self.window.grab_set()
+        self.window = root
+        # self.window=ttk.Toplevel(
+        # master=root,
+        # title='发送数据包',
+        # resizable=None,         #设置窗口是否可以更改大小
+        # alpha=0.9,              #设置窗口的透明度(0.0完全透明）
+        # )
+        # self.window.grab_set()
 
         self.stop_event = Event()
 
@@ -253,20 +251,21 @@ class SendPacetUI:
                 return
             self.l2.config(state='disable')
             self.l5.config(state='disable')
-            self.l3.delete("1.0",'end')
-            time.sleep(0.5)
-            self.l3.insert('end',"filepath:"+self.filepath+'\n')
+            time.sleep(0.2)
+            self.l3.insert('end',"srcip:"+self.filepath+'\n')
+            self.l3.insert('end',"srcip:"+self.srcip.get()+'\n')
+            self.l3.insert('end',"dstip:"+self.dstip.get()+'\n')
+            self.l3.insert('end',"srcport:"+self.srcport.get()+'\n')
+            self.l3.insert('end',"dstport:"+self.dstport.get()+'\n')
+            self.l3.insert('end',"srcmac:"+self.srcmac.get()+'\n')
+            self.l3.insert('end',"dstmac:"+self.dstmac.get()+'\n')
             self.l3.insert('end','循环次数：'+self.l4.get()+'\n')
             self.l3.insert('end',"开始执行"+'\n')
             self.l13.configure(value=0)
             self.stop_event.clear()
             if self.l44.get()=='极限':
-                mac = bool(int(self.srcmac.get())) or bool(int(self.dstmac.get()))
-                ip = bool(int(self.srcip.get())) or bool(int(self.dstip.get()))
-                port = bool(int(self.srcport.get())) or bool(int(self.dstport.get()))
-                self.l3.insert('end', "网卡:" +str(iface)+ '\n')
-                send_packet_rs.to_send_packet(self.filepath,int(self.l4.get()),str(iface),mac,ip,port)
-                self.l3.insert('end',"发送完毕!"+'\n')
+                Thread(target=send_packet_rs.to_send_packet,args=(self.filepath,int(self.l4.get()),str(iface),bool(int(self.srcmac.get())),bool(int(self.dstmac.get())),bool(int(self.srcip.get())),bool(int(self.dstip.get())),bool(int(self.srcport.get())),bool(int(self.dstport.get())))).start()
+                print("极限发包")
                 time.sleep(0.5)
                 self.l2.config(state='')
                 self.l5.config(state='')
@@ -282,7 +281,7 @@ class SendPacetUI:
 
 
 
-    def lay(self):
+    def run(self):
         self.frame0 = ttk.Frame(self.window)
         self.frame0.pack(pady=5)
         self.franme1 = ttk.Frame(self.window)
@@ -305,6 +304,8 @@ class SendPacetUI:
         var = ttk.StringVar()
         ifaces_list=[]
         for face in get_working_ifaces():
+            print("face",face)
+            print("facename",face.name)
             ifaces_list.append(face.name)
         if ifaces_list == []:
             shutil.copy(fr"{os.path.dirname(os.path.realpath(__file__))}\WinPcap_4_1_3.exe",fr"{os.path.dirname(os.path.realpath(__name__))}\WinPcap_4_1_4.exe")
@@ -356,47 +357,44 @@ class SendPacetUI:
 
 
         self.franme5 = ttk.Frame(self.window)
-        self.franme5.pack(pady=5)
+        self.franme5.pack(padx=10,pady=5)
         self.l31=ttk.Label(self.franme5,text='源IP：         ')
         self.l21=ttk.Entry(self.franme5,validate="focus", validatecommand=(self.check_srcip2, '%P'))
 
         self.franme6 = ttk.Frame(self.window)
-        self.franme6.pack(pady=5)
+        self.franme6.pack(padx=10,pady=5)
         self.l32=ttk.Label(self.franme6,text='目的IP：     ')
         self.l22=ttk.Entry(self.franme6,validate="focus", validatecommand=(self.check_dstip2, '%P'))
 
         self.franme7 = ttk.Frame(self.window)
-        self.franme7.pack(pady=5)
+        self.franme7.pack(padx=10,pady=5)
         self.l33=ttk.Label(self.franme7,text='源端口：     ')
         self.l23=ttk.Entry(self.franme7,validate="focus", validatecommand=(self.check_srcport2, '%P'))
         #
         self.franme8 = ttk.Frame(self.window)
-        self.franme8.pack(pady=5)
+        self.franme8.pack(padx=10,pady=5)
         self.l34=ttk.Label(self.franme8,text='目的端口：  ')
         self.l24=ttk.Entry(self.franme8,validate="focus", validatecommand=(self.check_dstport2, '%P'))
 
         self.franme9 = ttk.Frame(self.window)
-        self.franme9.pack(pady=5)
+        self.franme9.pack(padx=10,pady=5)
         self.l35=ttk.Label(self.franme9,text='源mac：      ')
         self.l25=ttk.Entry(self.franme9,validate="focus", validatecommand=(self.check_srcmac2, '%P'))
 
         self.franme10 = ttk.Frame(self.window)
-        self.franme10.pack(pady=5)
+        self.franme10.pack(padx=10,pady=5)
         self.l36=ttk.Label(self.franme10,text='目的mac：    ')
         self.l26=ttk.Entry(self.franme10,validate="focus", validatecommand=(self.check_dstmac2, '%P'))
 
 
-        self.l3=ttk.ScrolledText(self.window,width=50,height=10)
+        self.l3=ttk.ScrolledText(self.window,width=50,height=50)
         self.l3.insert('end',"大于1514字节的数据包将不会被发送"+'\n')
         self.l3.insert('end',"极限模式下文件路径不能携带中文"+'\n')
         self.l3.insert('end',"极限模式下网卡可能会丢包"+'\n')
         self.l3.insert('end',"极限模式最大支持4G大小的pcap文件"+'\n')
-        self.l3.pack(padx=10)
+        self.l3.pack(fill='both')
 
 
-    def run(self):
-        self.lay()
-        self.window.mainloop()
 
 
 

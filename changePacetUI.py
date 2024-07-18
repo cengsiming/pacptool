@@ -1,5 +1,4 @@
-import time
-import re
+import time,re
 
 from changePacket import ChangePacket,ipaddress
 import ttkbootstrap as ttk
@@ -7,21 +6,21 @@ from tkinter.filedialog import askopenfilename
 from threading import Thread
 
 
-class ChangePacetUI:
+class Change_Pacet_UI:
     def __init__(self,root):
         # self.window=ttk.Window(
         # title='修改IP和端口',
         # resizable=None,         #设置窗口是否可以更改大小
         # alpha=0.9,              #设置窗口的透明度(0.0完全透明）
         # )
-
-        self.window=ttk.Toplevel(
-        master=root,
-        title='修改pcap的六元组',
-        resizable=None,         #设置窗口是否可以更改大小
-        alpha=0.9,              #设置窗口的透明度(0.0完全透明）
-        )
-        self.window.grab_set()
+        self.window = root
+        # self.window=ttk.Toplevel(
+        # master=root,
+        # title='修改pcap的六元组',
+        # resizable=None,         #设置窗口是否可以更改大小
+        # alpha=0.9,              #设置窗口的透明度(0.0完全透明）
+        # )
+        # self.window.grab_set()
 
 
     # # self.window.place_window_center()    #让显现出的窗口居中
@@ -249,7 +248,7 @@ class ChangePacetUI:
             # print('文件类型错误')
             return
 
-    def lay(self):
+    def run(self):
 
         self.franme1 = ttk.Frame(self.window)
         self.franme1.pack(pady=5)
@@ -292,37 +291,37 @@ class ChangePacetUI:
 
 
         self.franme5 = ttk.Frame(self.window)
-        self.franme5.pack(pady=5)
+        self.franme5.pack(padx=10,pady=5)
         self.l31=ttk.Label(self.franme5,text='源IP：         ')
         self.l21=ttk.Entry(self.franme5,validate="focus", validatecommand=(self.check_srcip2, '%P'))
 
         self.franme6 = ttk.Frame(self.window)
-        self.franme6.pack(pady=5)
+        self.franme6.pack(padx=10,pady=5)
         self.l32=ttk.Label(self.franme6,text='目的IP：     ')
         self.l22=ttk.Entry(self.franme6,validate="focus", validatecommand=(self.check_dstip2, '%P'))
 
         self.franme7 = ttk.Frame(self.window)
-        self.franme7.pack(pady=5)
+        self.franme7.pack(padx=10,pady=5)
         self.l33=ttk.Label(self.franme7,text='源端口：     ')
         self.l23=ttk.Entry(self.franme7,validate="focus", validatecommand=(self.check_srcport2, '%P'))
         #
         self.franme8 = ttk.Frame(self.window)
-        self.franme8.pack(pady=5)
+        self.franme8.pack(padx=10,pady=5)
         self.l34=ttk.Label(self.franme8,text='目的端口：  ')
         self.l24=ttk.Entry(self.franme8,validate="focus", validatecommand=(self.check_dstport2, '%P'))
 
         self.franme9 = ttk.Frame(self.window)
-        self.franme9.pack(pady=5)
+        self.franme9.pack(padx=10,pady=5)
         self.l35=ttk.Label(self.franme9,text='源mac：      ')
         self.l25=ttk.Entry(self.franme9,validate="focus", validatecommand=(self.check_srcmac2, '%P'))
 
         self.franme10 = ttk.Frame(self.window)
-        self.franme10.pack(pady=5)
+        self.franme10.pack(padx=10,pady=5)
         self.l36=ttk.Label(self.franme10,text='目的mac：    ')
         self.l26=ttk.Entry(self.franme10,validate="focus", validatecommand=(self.check_dstmac2, '%P'))
 
 
-        self.l3=ttk.ScrolledText(self.window,width=40,height=10)
+        self.l3=ttk.ScrolledText(self.window,width=40,height=50)
         self.l3.insert('end','1、支持同时修改多条流'+'\n')
         self.l3.insert('end','2、只有勾选的项才会被修改'+'\n')
         self.l3.insert('end','3、某些协议无法改变IP和端口，比如ARP'+'\n')
@@ -330,14 +329,11 @@ class ChangePacetUI:
         self.l3.insert('end','5、指定IP模式，不支持IPv4和IPv6之间相互转换'+'\n')
         self.l3.insert('end','6、随机IP模式，支持同时修改IPv4和IPv6(多条流)，但不会互相转换'+'\n')
         self.l3.insert('end',"7、某些协议依赖端口进行识别，修改之后可能导致无法识别出原有协议或者识别出原pcap没有的协议"+'\n')
-        self.l3.pack(padx=10)
+        self.l3.pack(padx=10,fill='both')
 
-    def run(self):
-        self.lay()
-        self.window.mainloop()
+
 
 
 
 if __name__ == '__main__':
-    aaa=ChangePacetUI(1)
-    aaa.run()
+    ...

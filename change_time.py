@@ -9,18 +9,19 @@ class ChangeTime_ui:
         # self.window = ttk.Window()  # 实例化
         # self.window.call('tk', 'scaling', 1.333)  # 设置程序缩放为1.333
         #
-        self.window=ttk.Toplevel(
-        master=root,
-        title='修改时间戳',
-        resizable=None,         #设置窗口是否可以更改大小
-        alpha=0.9,              #设置窗口的透明度(0.0完全透明）
-        )
-        self.window.grab_set()
-        self.ddd = [0,0]
-        self.window.title('修改时间戳')
+        self.window = root
+        # self.window=ttk.Toplevel(
+        # master=root,
+        # title='修改时间戳',
+        # resizable=None,         #设置窗口是否可以更改大小
+        # alpha=0.9,              #设置窗口的透明度(0.0完全透明）
+        # )
+        # self.window.grab_set()
+        # self.ddd = [0,0]
+        # self.window.title('修改时间戳')
         self.check_time=self.window.register(self.check_time2)#注册验证函数
 
-        self.layout_1()
+        # self.run()
 
     def check_time2(self,x):
         try:
@@ -66,7 +67,7 @@ class ChangeTime_ui:
         Thread(target=self.start_merge,args=(self.filepath,self.interval,)).start()
 
 
-    def layout_1(self):
+    def run(self):
         self.frame1=ttk.Frame(self.window)
         self.frame1.pack(pady=5)
 
@@ -80,8 +81,8 @@ class ChangeTime_ui:
         self.l3.pack(side='left',padx=10,pady=5)
 
 
-        self.l4=ttk.ScrolledText(self.window,width=40,height=10)
-        self.l4.pack()
+        self.l4=ttk.ScrolledText(self.window,width=40,height=50)
+        self.l4.pack(fill='both')
         self.window.mainloop()
 
 

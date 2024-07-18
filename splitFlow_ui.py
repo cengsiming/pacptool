@@ -1,5 +1,7 @@
+import time
 from tkinter.filedialog import askopenfilename
 import ttkbootstrap as ttk
+from compare_pcap import start_run,wirte_result2
 from threading import Thread
 from splitFlow import SplitFlow
 
@@ -7,19 +9,18 @@ class Split_ui:
     def __init__(self,root):
         # self.window = ttk.Window()  # 实例化
         # self.window.call('tk', 'scaling', 1.333)  # 设置程序缩放为1.333
-        #
-        self.window=ttk.Toplevel(
-        master=root,
-        title='拆分pcap为多条流',
-        resizable=None,         #设置窗口是否可以更改大小
-        alpha=0.9,              #设置窗口的透明度(0.0完全透明）
-        )
-        self.window.grab_set()
+        self.window = root
+        # self.window=ttk.Toplevel(
+        # master=root,
+        # title='拆分pcap为多条流',
+        # resizable=None,         #设置窗口是否可以更改大小
+        # alpha=0.9,              #设置窗口的透明度(0.0完全透明）
+        # )
+        # self.window.grab_set()
 
-        self.window.title('拆分pcap为多条流')
         self.files=[]
         self.result=''
-        self.layout_1()
+        # self.layout_1()
 
 
     def select_file(self):
@@ -35,7 +36,7 @@ class Split_ui:
 
 
 
-    def layout_1(self):
+    def run(self):
         self.frame1=ttk.Frame(self.window)
         self.frame1.pack(pady=5)
 
@@ -44,11 +45,11 @@ class Split_ui:
         self.l3=ttk.Button(self.frame1,text='确定', state='disable',bootstyle="success",command=self.to_2)
         self.l3.pack(side='left',padx=10,pady=5)
 
-        self.l4=ttk.ScrolledText(self.window,width=40,height=10)
+        self.l4=ttk.ScrolledText(self.window,width=40,height=50)
         self.l4.insert('end','请选择pcap或者pcapng文件'+'\n')
         self.l4.insert('end','以四元组作为拆分依据'+'\n')
         self.l4.insert('end','拆分文件以四元组进行命名'+'\n')
-        self.l4.pack()
+        self.l4.pack(fill='both')
         self.window.mainloop()
 
 

@@ -14,17 +14,17 @@ class EditPackets:
         # self.root = tk.Window()
         # self.root.title('pcap字段编辑工具')
         # self.root.geometry('900x600')
+        self.window = root
+        # self.window=tk.Toplevel(
+        # master=root,
+        # title='pcap字段编辑工具',
+        # resizable=None,         #设置窗口是否可以更改大小
+        # alpha=0.9,              #设置窗口的透明度(0.0完全透明）
+        # size=(900, 610)
+        # )
+        # self.window.grab_set()
 
-        self.window=tk.Toplevel(
-        master=root,
-        title='pcap字段编辑工具',
-        resizable=None,         #设置窗口是否可以更改大小
-        alpha=0.9,              #设置窗口的透明度(0.0完全透明）
-        size=(900, 610)
-        )
-        self.window.grab_set()
-
-
+    # def run(self):
         self.frame0 = tk.Frame(self.window)
         self.frame0.place(x=10, y=10, width=880, height=30, )
 
@@ -210,7 +210,7 @@ class EditPackets:
                     self.tempacket[self.parent_layer].setfieldval(self.new_values[0].split(':')[0].strip(),self.new_values[0].split(':')[1].strip())
                     # setattr(self.tempacket[self.parent_layer], self.new_values[0].split(':')[0], self.new_values[0].split(':')[1])
             except Exception as e:
-                showwarning(title='', message='修改失败'+str(e))
+                showwarning(title='', message=f'修改失败'+str(e))
 
                 # self.tempacket[self.parent_layer].setfieldval(self.new_values[0].split(':')[0],
                 #                                                             int(self.new_values[0].split(':')[1]))

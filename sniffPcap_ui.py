@@ -13,24 +13,25 @@ from scapy.arch.common import compile_filter
 from sniffEtherIP_ui import session_GUI
 from sniffTcpFlow_ui import track_tcp_GUI
 # show_interfaces()
-show_interfaces()
+# show_interfaces()
 # packets = sniff(count=10, iface="Realtek 8822BE Wireless LAN 802.11ac PCI-E NIC")
 # number=0
 # for packet in packets:
 #     print(packet)
 #     packet.show()
 
-class GUI:
-    def __init__(self,root):
-
-        self.root=tk.Toplevel(
-        master=root,
-        title='网络嗅探',
-        resizable=None,         #设置窗口是否可以更改大小
-        alpha=0.9,              #设置窗口的透明度(0.0完全透明）
-        size=(900, 670)
-        )
-        self.root.grab_set()
+class sniff_GUI:
+    def __init__(self,root,main_frame):
+        self.read_root = root
+        self.root = main_frame
+        # self.root=tk.Toplevel(
+        # master=root,
+        # title='网络嗅探',
+        # resizable=None,         #设置窗口是否可以更改大小
+        # alpha=0.9,              #设置窗口的透明度(0.0完全透明）
+        # size=(900, 670)
+        # )
+        # self.root.grab_set()
 
 
         # self.root= tk.Window(
@@ -39,21 +40,21 @@ class GUI:
         # )
         # self.root.title('网络嗅探工具')
         # self.root.geometry('900x600') # 这里的乘号不是 * ，而是小写英文字母 x
+    
+    def run(self):
         self.frame0 = tk.Frame(self.root)
-        self.frame0.place(x=10, y=10, width=880, height=90, )
+        self.frame0.place(x=10, y=10, width=880, height=90)
 
         self.frame1 = tk.Frame(self.root)
-        self.frame1.place(x=10, y=120, width=880, height=158,)
+        self.frame1.place(x=10, y=120, width=880, height=158)
 
         self.frame2 = tk.Frame(self.root )
-        self.frame2.place(x=10, y=300, width=880, height=158,)
-        # 设定黄色，以确定我实际发生测试的区域
-        # self.frame2.config(bg='blue')
+        self.frame2.place(x=10, y=300, width=880, height=158)
+
 
         self.frame3 = tk.Frame(self.root )
-        self.frame3.place(x=10, y=480, width=880, height=160, )
-        #设定黄色，以确定我实际发生测试的区域
-        #self.frame3.config(bg='yellow')
+        self.frame3.place(x=10, y=480, width=880, height=160)
+
         self.packet_handling=None
         self.packet_queue=Queue()
         #self.tabel_frame = Frame(self.root)#Frame
@@ -69,26 +70,26 @@ class GUI:
         #self.update_layer_list(packet)
         self.packets=[]
         self.count=0
+
+
     def filemenu(self):
         mainmenu = tk.Menu(self.root)
         filemenu=tk.Menu(mainmenu,tearoff=False)
         filemenu2=tk.Menu(mainmenu,tearoff=False)
         filemenu3=tk.Menu(mainmenu,tearoff=False)
-        filemenu.add_command (label="介绍",command=self.menuCommand)
-        filemenu.add_separator()
-        filemenu.add_command (label="退出",command=self.root.quit)
-        mainmenu.add_cascade (label="文件",menu=filemenu)
+        filemenu.add_command(label="介绍",command=self.menuCommand)
+        mainmenu.add_cascade(label="文件",menu=filemenu)
 
         filemenu2=tk.Menu(mainmenu,tearoff=False)
-        filemenu2.add_command (label="以太网统计",command=self.session)
-        filemenu2.add_command (label="IP统计",command=self.session_IP)
-        mainmenu.add_cascade (label="统计",menu=filemenu2)
+        filemenu2.add_command(label="以太网统计",command=self.session)
+        filemenu2.add_command(label="IP统计",command=self.session_IP)
+        mainmenu.add_cascade(label="统计",menu=filemenu2)
 
         filemenu3=tk.Menu(mainmenu,tearoff=False)
-        filemenu3.add_command (label="追踪TCP流",command=self.track_tcp)
-        mainmenu.add_cascade (label="分析",menu=filemenu3)
+        filemenu3.add_command(label="追踪TCP流",command=self.track_tcp)
+        mainmenu.add_cascade(label="分析",menu=filemenu3)
+        self.read_root.config(menu=mainmenu)
 
-        self.root.config (menu=mainmenu)
     def menuCommand(self):
         tkinter.messagebox.showinfo(title='提示', message='网络嗅探工具\n抓取报文将自动保存pcap至当前目录')
     def session(self):
@@ -116,6 +117,7 @@ class GUI:
         self.entry1.place(relx=0.1,rely=0.6,relwidth=0.7)
         self.label1=Label(self.frame0,text="捕获过滤:",font =("微软雅黑",10),)
         self.label1.place(relx=0.01,rely=0.6)
+
     def check_filter(self,e):
         filter_s=self.entry1.get().strip()
         # if filter_s=='':
